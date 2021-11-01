@@ -102,13 +102,17 @@ def check_events(ai_settings,screen,ship,bullets):
 
 
 
-def update_screen(ai_settings,screen,ship,aliens,bullets):
+def update_screen(ai_settings,screen,stats,ship,aliens,bullets,play_button):
 
     screen.fill(ai_settings.bg_color)
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     ship.blitme()
     aliens.draw(screen)
+    #Drawn the play button if the game is inactive
+    if not stats.game_active:
+        play_button.draw_button()
+
     pygame.display.flip()
 
 def update_bullets(ai_settings,screen,ship,aliens,bullets):
