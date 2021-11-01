@@ -123,20 +123,22 @@ def check_play_button(ai_settings,screen,stats,play_button,ship,aliens,bullets,m
 
 
 
-def update_screen(ai_settings,screen,stats,ship,aliens,bullets,play_button):
+def update_screen(ai_settings,screen,stats,sb,ship,aliens,bullets,play_button):
 
     screen.fill(ai_settings.bg_color)
     for bullet in bullets.sprites():
         bullet.draw_bullet()
     ship.blitme()
     aliens.draw(screen)
+    #Draw the score information
+    sb.show_score()
     #Drawn the play button if the game is inactive
     if not stats.game_active:
         play_button.draw_button()
 
     pygame.display.flip()
 
-def update_bullets(ai_settings,screen,ship,aliens,bullets):
+def update_bullets(ai_settings,screen,stats,sb,ship,aliens,bullets):
     """"Update position of bullets and get rid of old bullets"""
     #Update bullet positions
     bullets.update()
@@ -144,12 +146,18 @@ def update_bullets(ai_settings,screen,ship,aliens,bullets):
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
-    check_bullet_alien_collisions(ai_settings,screen,ship,aliens,bullets)
+    check_bullet_alien_collisions(ai_settings,screen,stats,sb,ship,aliens,bullets)
 
-def check_bullet_alien_collisions(ai_settings,screen,ship,aliens,bullets):
+def check_bullet_alien_collisions(ai_settings,screen,stats,sb,ship,aliens,bullets):
     #Check for any bullets that have hit aliens
     #if so, get rid of the bullet an the alien
     collisions = pygame.sprite.groupcollide(bullets,aliens,True,True)
+    if collisions:
+        for aliens in collisions.values():
+
+            stats.score += ai_settings.alien_points * len(aliens)
+            sb.prep_score()
+        check_high_score(stats,sb)
     if len(aliens)==0:
         #Destroy existing bullets, speed up game, and create new fleet.
         bullets.empty()
@@ -189,3 +197,8 @@ def change_fleet_direction(ai_settigns,aliens):
         alien.rect.y += ai_settigns.fleet_drop_speed
     ai_settigns.fleet_direction*=-1
 
+def check_high_score(stats,sb):
+    """Check to see if there's a new high score"""
+    if stats.score> stats.high_score:
+        stats.high_score=stats.score
+        sb.prep_high_score()
